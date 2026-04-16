@@ -1,0 +1,6 @@
+user_id,age,income,city,avg_spend,transaction_count,favorite_category
+1,25,50000,Delhi,850.0,2,food
+2,32,80000,Mumbai,850.0,2,shopping
+3,28,60000,Bangalore,350.0,2,food
+4,40,90000,Delhi,1500.0,1,shopping
+5,22,30000,Pune,200.0,1,food
