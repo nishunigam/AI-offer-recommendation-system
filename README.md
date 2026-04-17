@@ -9,10 +9,10 @@ An end-to-end machine learning system for generating **personalized offer recomm
 ## Demo
 
 ### Home UI
-
+UI_Image.png
 
 ### Recommendations Output
-
+UI_Output.png
 
 ## Project Overview
 
