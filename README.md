@@ -11,10 +11,10 @@ An end-to-end machine learning system for generating **personalized offer recomm
 ## Demo
 
 ### Home UI
-https://github.com/nishunigam/AI-offer-recommendation-system/blob/main/UI_Image.png
+![UI](https://raw.githubusercontent.com/nishunigam/AI-offer-recommendation-system/main/UI_Image.png)
 
 ### Recommendations Output
-https://github.com/nishunigam/AI-offer-recommendation-system/blob/main/UI_Output.png
+![Results](https://raw.githubusercontent.com/nishunigam/AI-offer-recommendation-system/main/UI_Output.png)
 
 ## Project Overview
 
