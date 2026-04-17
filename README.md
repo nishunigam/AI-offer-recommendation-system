@@ -156,6 +156,7 @@ http://127.0.0.1:5000/recommend?user_id=1
 
 ## Sample Output
 
+```
 [
 {
 "category": "food",
@@ -170,6 +171,7 @@ http://127.0.0.1:5000/recommend?user_id=1
 "score": 3.27
 }
 ]
+```
 
 
 ## Deployment
