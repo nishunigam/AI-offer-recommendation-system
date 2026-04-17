@@ -9,7 +9,7 @@ An end-to-end machine learning system for generating **personalized offer recomm
 ## Demo
 
 ### Home UI
-UI_Image.png
+
 
 ### Recommendations Output
 UI_Output.png
@@ -112,11 +112,76 @@ AI-offer-recommendation-system/
 ├── requirements.txt
 ├── Procfile
 
-
-
 ## How to Run Locally
 
 ### 1. Clone the repo
+git clone https://github.com/nishunigam/AI-offer-recommendation-system.git
+cd AI-offer-recommendation-system
+
+### 2. Install dependencies
+pip install -r requirements.txt
+
+### 3. Run preprocessing
+python src/preprocess.py
+
+### 4. Train model
+python src/train.py
+
+### 5. Start Flask server
+python app/app.py
+
+### 6. Open in browser
+http://127.0.0.1:5000/
+
+### Example Request
+http://127.0.0.1:5000/recommend?user_id=1
+
+## Sample Output
+[
+{
+"category": "food",
+"discount": 10,
+"offer_id": 1,
+"score": 4.85
+},
+{
+"category": "shopping",
+"discount": 20,
+"offer_id": 2,
+"score": 3.27
+}
+]
 
 
+## Deployment
 
+The application is deployed on a cloud platform and supports **real-time inference via REST API**.
+
+## Production Insight
+
+To ensure **low-latency performance in a resource-constrained environment**, a lightweight scoring layer is used during inference while the ML model is trained offline.
+
+## Key Learning Outcomes
+
+* Built an end-to-end ML pipeline from scratch  
+* Implemented Learning-to-Rank using LightGBM  
+* Designed feature engineering from transactional data  
+* Integrated ML model into a production-like API  
+* Connected backend with a dynamic frontend UI  
+
+## Future Improvements (Phase 2)
+
+* Use real-world dataset (Kaggle)  
+* Improve ranking features (RFM, time decay)  
+* Add user authentication  
+* Implement model retraining pipeline  
+* Add logging & monitoring
+  
+## Resume Highlight
+
+Built and deployed an end-to-end ML-based recommendation system using LightGBM ranking, serving real-time personalized offers via a Flask API with an interactive frontend UI, optimized for low-latency cloud deployment.
+
+## 👤 Author
+
+**Nishchala Nigam**  
+🔗 https://github.com/nishunigam
