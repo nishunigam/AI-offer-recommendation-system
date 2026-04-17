@@ -18,20 +18,6 @@ model_features = pickle.load(open('models/model_features.pkl', 'rb'))
 
 features = pd.read_csv('features/features.csv')
 
-# Encode ONCE (startup)
-encoded_features = pd.get_dummies(
-    features,
-    columns=['city', 'favorite_category']
-)
-
-# -------------------------------
-# PRECOMPUTE USER FEATURE MAP
-# -------------------------------
-user_features_map = {}
-
-for _, row in encoded_features.iterrows():
-    user_features_map[row['user_id']] = row.to_dict()
-
 # -------------------------------
 # OFFERS (same as training)
 # -------------------------------
@@ -42,22 +28,36 @@ offers = pd.DataFrame({
 })
 
 # -------------------------------
-# RECOMMEND FUNCTION (FAST)
+# RECOMMEND FUNCTION (ULTRA LIGHT)
 # -------------------------------
 def recommend(user_id):
-    if user_id not in user_features_map:
+    # Get only ONE user
+    user_df = features[features['user_id'] == user_id]
+
+    if user_df.empty:
         return []
 
-    user = user_features_map[user_id]
+    user = user_df.iloc[0].to_dict()
     rows = []
 
     for _, offer in offers.iterrows():
-        row = user.copy()
+        row = {}
 
-        # Add offer info
+        # --- Numeric / base features ---
+        for key in user:
+            if key not in ['city', 'favorite_category']:
+                row[key] = user[key]
+
+        # --- Encode user categorical features ---
+        for col in model_features:
+            if col.startswith('city_'):
+                row[col] = 1 if col == f"city_{user.get('city')}" else 0
+            elif col.startswith('favorite_category_'):
+                row[col] = 1 if col == f"favorite_category_{user.get('favorite_category')}" else 0
+
+        # --- Offer features ---
         row['discount'] = offer['discount']
 
-        # Encode offer category manually
         for cat in ['food', 'shopping', 'travel']:
             row[f'category_{cat}'] = 1 if offer['category'] == cat else 0
 
@@ -65,7 +65,7 @@ def recommend(user_id):
 
     data = pd.DataFrame(rows)
 
-    # Align with model features
+    # Align with training features
     for col in model_features:
         if col not in data.columns:
             data[col] = 0
@@ -75,6 +75,7 @@ def recommend(user_id):
     # Predict
     scores = model.predict(data)
 
+    # Build response
     result = []
     for i, offer in offers.iterrows():
         result.append({
