@@ -34,35 +34,49 @@ offers = pd.DataFrame({
 # Load feature columns
 model_features = pickle.load(open('models/model_features.pkl', 'rb'))
 
-def recommend(user_id):
-    user = features[features['user_id'] == user_id].head(1)
+# Precompute user features (ONE ROW PER USER)
+user_features_map = {}
 
-    if user.empty:
+for _, row in encoded_features.iterrows():
+    user_features_map[row['user_id']] = row.to_dict()
+
+def recommend(user_id):
+    if user_id not in user_features_map:
         return []
 
-    user = user.copy()
+    user = user_features_map[user_id]
 
-    # Cross join
-    user['key'] = 1
-    offers['key'] = 1
-    data = user.merge(offers, on='key').drop('key', axis=1)
+    results = []
 
-    # Encode
-    data = pd.get_dummies(data, columns=['city', 'favorite_category', 'category'])
+    for _, offer in offers.iterrows():
+        row = user.copy()
 
-    # Align with training columns
+        # Add offer info
+        row['discount'] = offer['discount']
+
+        # Encode offer category manually
+        for cat in ['food', 'shopping', 'travel']:
+            row[f'category_{cat}'] = 1 if offer['category'] == cat else 0
+
+        results.append(row)
+
+    data = pd.DataFrame(results)
+
+    # Align columns
     for col in model_features:
         if col not in data.columns:
             data[col] = 0
 
     data = data[model_features]
 
-    # Predict
     scores = model.predict(data)
+
     data['score'] = scores
+    data['offer_id'] = offers['offer_id']
+    data['category'] = offers['category']
+    data['discount'] = offers['discount']
 
     return data[['offer_id', 'category', 'discount', 'score']].to_dict(orient='records')
-
 # -------------------------------
 # ROUTES
 # -------------------------------
