@@ -2,12 +2,9 @@
 
 An end-to-end machine learning system for generating **personalized offer recommendations** using user behavior and transactional data.
 
----
 
 ## Live Demo
 [https://ai-offer-recommendation-system.onrender.com](https://ai-offer-recommendation-system.onrender.com/)
-
----
 
 ## Demo
 
@@ -15,7 +12,7 @@ An end-to-end machine learning system for generating **personalized offer recomm
 
 
 ### Recommendations Output
----
+
 
 ## Project Overview
 
@@ -28,8 +25,6 @@ The system includes:
 * REST API using Flask  
 * Interactive frontend UI using Bootstrap  
 * Cloud deployment for real-time inference  
-
----
 
 ## Architecture
 
@@ -45,8 +40,6 @@ Flask API (/recommend)
 ↓
 Frontend UI (HTML + Bootstrap)
 
----
-
 ## Tech Stack
 
 * **Language:** Python  
@@ -56,8 +49,6 @@ Frontend UI (HTML + Bootstrap)
 * **Frontend:** HTML, Bootstrap, JavaScript  
 * **Deployment:** Render  
 
----
-
 ## Features Implemented
 
 ### Feature Engineering
@@ -65,9 +56,7 @@ Frontend UI (HTML + Bootstrap)
 * Average spend per user  
 * Transaction frequency  
 * Favorite category detection  
-* Demographic enrichment (age, income, city)  
-
----
+* Demographic enrichment (age, income, city)
 
 ### Recommendation Logic
 
@@ -76,16 +65,12 @@ Frontend UI (HTML + Bootstrap)
 * Ranking using LightGBM (`lambdarank` objective)  
 * Lightweight scoring layer for real-time inference  
 
----
-
 ## Model Details
 
 - Algorithm: LightGBM Ranker (LambdaRank)  
 - Objective: Optimize ranking quality using NDCG  
 - Input: User features + offer features  
-- Output: Relevance score for each user-offer pair  
-
----
+- Output: Relevance score for each user-offer pair
 
 ## API
 
@@ -96,8 +81,6 @@ Frontend UI (HTML + Bootstrap)
 Example:
 http://127.0.0.1:5000/recommend?user_id=1
 
----
-
 ## Frontend UI
 
 * User input for ID  
@@ -106,9 +89,8 @@ http://127.0.0.1:5000/recommend?user_id=1
 * Responsive Bootstrap design  
 * Loading indicator  
 
----
-
 ## Project Structure
+
 AI-offer-recommendation-system/
 │
 ├── app/
@@ -130,7 +112,7 @@ AI-offer-recommendation-system/
 ├── requirements.txt
 ├── Procfile
 
----
+
 
 ## How to Run Locally
 
