@@ -80,9 +80,20 @@ def home():
 
 @app.route('/recommend', methods=['GET'])
 def get_recommendations():
-    user_id = int(request.args.get('user_id'))
-    results = recommend(user_id)
-    return jsonify(results)
+    try:
+        user_id = request.args.get('user_id')
+
+        if not user_id:
+            return jsonify({"error": "user_id is required"}), 400
+
+        user_id = int(user_id)
+
+        results = recommend(user_id)
+        return jsonify(results)
+
+    except Exception as e:
+        print("ERROR:", str(e))  # logs in Render
+        return jsonify({"error": str(e)}), 500
 
 
 # -------------------------------
