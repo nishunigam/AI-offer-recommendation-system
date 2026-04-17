@@ -85,9 +85,9 @@ def get_recommendations():
         return jsonify(results)
 
     except Exception as e:
-        print("ERROR:", str(e))
+        import traceback
+        print("FULL ERROR:\n", traceback.format_exc())  # 🔥 IMPORTANT
         return jsonify({"error": str(e)}), 500
-
 
 # -------------------------------
 # RUN SERVER
