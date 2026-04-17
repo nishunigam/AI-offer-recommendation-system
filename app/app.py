@@ -11,6 +11,11 @@ CORS(app)
 # -------------------------------
 model = pickle.load(open('models/model.pkl', 'rb'))
 features = pd.read_csv('features/features.csv')
+# Pre-encode user features ONCE (startup time)
+encoded_features = pd.get_dummies(
+    features,
+    columns=['city', 'favorite_category']
+)
 
 # Dummy offers (same as training)
 offers = pd.DataFrame({
@@ -23,48 +28,34 @@ offers = pd.DataFrame({
 # RECOMMENDATION FUNCTION
 # -------------------------------
 def recommend(user_id):
-    user = features[features['user_id'] == user_id]
+    user = encoded_features[encoded_features['user_id'] == user_id]
 
     if user.empty:
-        return ["User not found"]
+        return []
 
-    # Cross join user with offers
     user = user.copy()
+
+    # Cross join
     user['key'] = 1
     offers['key'] = 1
     data = user.merge(offers, on='key').drop('key', axis=1)
 
-    # Save original columns before encoding
-    original_data = data[['offer_id', 'category', 'discount']].copy()
+    # Encode only offer category (small)
+    data = pd.get_dummies(data, columns=['category'])
 
-    # Encode
-    data = pd.get_dummies(data, columns=['city', 'favorite_category', 'category'])
-
-    # Align columns with training model
+    # Align columns
     model_features = model.feature_name()
+
     for col in model_features:
         if col not in data.columns:
             data[col] = 0
 
     data = data[model_features]
 
-    # Predict scores
     scores = model.predict(data)
     data['score'] = scores
 
-    # Rank offers
-    top_offers = data.sort_values('score', ascending=False)
-
-    # Merge scores back with original data
-    top_offers = data.copy()
-    top_offers['score'] = scores
-
-    result = original_data.copy()
-    result['score'] = scores
-
-    result = result.sort_values('score', ascending=False)
-
-    return result.to_dict(orient='records')
+    return data[['offer_id', 'discount', 'score']].to_dict(orient='records')
 
 
 # -------------------------------
@@ -99,9 +90,6 @@ def get_recommendations():
 # -------------------------------
 # RUN SERVER
 # -------------------------------
-if __name__ == '__main__':
-    import os
-
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
