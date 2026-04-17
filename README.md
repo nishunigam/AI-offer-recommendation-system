@@ -132,16 +132,24 @@ cd AI-offer-recommendation-system
 ```
 
 ### 2. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
 ### 3. Run preprocessing
+```bash
 python src/preprocess.py
+```
 
 ### 4. Train model
+```bash
 python src/train.py
+```
 
 ### 5. Start Flask server
+```bash
 python app/app.py
+```
 
 ### 6. Open in browser
 http://127.0.0.1:5000/
