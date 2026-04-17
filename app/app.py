@@ -31,38 +31,37 @@ offers = pd.DataFrame({
 # -------------------------------
 # LIGHTWEIGHT RECOMMENDATION ENGINE
 # -------------------------------
+# Load feature columns
+model_features = pickle.load(open('models/model_features.pkl', 'rb'))
+
 def recommend(user_id):
-    user = features[features['user_id'] == user_id]
+    user = features[features['user_id'] == user_id].head(1)
 
     if user.empty:
         return []
 
-    user = user.iloc[0]
+    user = user.copy()
 
-    results = []
+    # Cross join
+    user['key'] = 1
+    offers['key'] = 1
+    data = user.merge(offers, on='key').drop('key', axis=1)
 
-    for _, offer in offers.iterrows():
-        score = 0
+    # Encode
+    data = pd.get_dummies(data, columns=['city', 'favorite_category', 'category'])
 
-        # Rule-based scoring (FAST)
-        if user['favorite_category'] == offer['category']:
-            score += 5
+    # Align with training columns
+    for col in model_features:
+        if col not in data.columns:
+            data[col] = 0
 
-        score += offer['discount'] / 5
-        score += user['avg_spend'] / 500  # simulate ML signal
+    data = data[model_features]
 
-        results.append({
-            "offer_id": int(offer['offer_id']),
-            "category": offer['category'],
-            "discount": int(offer['discount']),
-            "score": float(score)
-        })
+    # Predict
+    scores = model.predict(data)
+    data['score'] = scores
 
-    # Sort by score
-    results = sorted(results, key=lambda x: x['score'], reverse=True)
-
-    return results
-
+    return data[['offer_id', 'category', 'discount', 'score']].to_dict(orient='records')
 
 # -------------------------------
 # ROUTES
