@@ -8,80 +8,85 @@
     <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<body class="bg-dark text-white">
 
-<body class="bg-light">
+<div class="container py-5">
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Personalized Offer Recommender</h2>
+    <!-- Title -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">AI Offer Recommendation System</h1>
+        <p class="text-muted">Get personalized offers based on your behavior</p>
+    </div>
 
-    <!-- Input Section -->
-    <div class="card p-4 shadow">
-        <div class="mb-3">
-            <label class="form-label">Enter User ID</label>
-            <input type="number" id="userId" class="form-control" placeholder="e.g. 1">
+    <!-- Input Card -->
+    <div class="card shadow-lg p-4 bg-secondary text-white">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-8">
+                <input type="number" id="userId" class="form-control form-control-lg"
+                       placeholder="Enter User ID">
+            </div>
+            <div class="col-md-4 d-grid">
+                <button class="btn btn-warning btn-lg" onclick="getRecommendations()">
+                    Get Recommendations
+                </button>
+            </div>
         </div>
+    </div>
 
-        <button class="btn btn-primary w-100" onclick="getRecommendations()">
-            Get Recommendations
-        </button>
+    <!-- Loading -->
+    <div id="loading" class="text-center mt-4 d-none">
+        <div class="spinner-border text-warning"></div>
+        <p>Fetching recommendations...</p>
     </div>
 
     <!-- Results -->
-    <div class="row mt-4" id="results"></div>
+    <div id="results" class="row mt-5"></div>
+
 </div>
 
 <script>
 async function getRecommendations() {
-    console.log("BUTTON CLICKED");
+    const userId = document.getElementById("userId").value;
+    const resultsDiv = document.getElementById("results");
+    const loading = document.getElementById("loading");
 
-    const userId = document.getElementById('userId').value;
-
-    if (!userId) {
-        alert("Please enter a User ID");
-        return;
-    }
+    resultsDiv.innerHTML = "";
+    loading.classList.remove("d-none");
 
     try {
-        const response = await fetch(`recommend?user_id=${userId}`);
+        const response = await fetch(`/recommend?user_id=${userId}`);
         const data = await response.json();
 
-        console.log("API DATA:", data);
+        loading.classList.add("d-none");
 
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = "";
+        if (data.error) {
+            resultsDiv.innerHTML = `<p class="text-danger">${data.error}</p>`;
+            return;
+        }
 
-        data.sort((a, b) => b.score - a.score);
+        data.forEach((offer, index) => {
+            const isTop = index === 0;
 
-        data.forEach((item, index) => {
-            const card = document.createElement("div");
-            card.className = "col-md-4";
-
-            card.innerHTML = `
-                <div class="card shadow-lg mb-3 border-0">
-                    <div class="card-body text-center">
-
-                        ${index === 0 ? '<span class="badge bg-success mb-2">Top Pick</span>' : ''}
-
-                        <h5 class="card-title text-primary fw-bold">
-                            ${item.category.toUpperCase()}
-                        </h5>
-
-                        <p class="text-muted">Discount: ${item.discount}%</p>
-
-                        <h4 class="text-success">
-                            Score: ${Number(item.score).toFixed(2)}
-                        </h4>
+            const card = `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow ${isTop ? 'border-warning border-3' : ''}">
+                        <div class="card-body text-dark">
+                            <h5 class="card-title">${offer.category.toUpperCase()}</h5>
+                            <p>Discount: <strong>${offer.discount}%</strong></p>
+                            <p>Score: ${offer.score.toFixed(2)}</p>
+                            ${isTop ? '<span class="badge bg-warning text-dark">Top Recommendation</span>' : ''}
+                        </div>
                     </div>
                 </div>
             `;
 
-            resultsDiv.appendChild(card);
+            resultsDiv.innerHTML += card;
         });
 
-    }
-    catch (error) {
-        console.error("ERROR:", error);
-        alert("Something went wrong. Check console.");
+    } catch (error) {
+        console.error(error);
+        loading.classList.add("d-none");
+        resultsDiv.innerHTML = `<p class="text-danger">Something went wrong</p>`;
     }
 }
 </script>
