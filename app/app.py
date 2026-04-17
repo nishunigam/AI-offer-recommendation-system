@@ -9,8 +9,8 @@ CORS(app)
 # -------------------------------
 # LOAD MODEL & FEATURES
 # -------------------------------
-model = pickle.load(open('../models/model.pkl', 'rb'))
-features = pd.read_csv('../features/features.csv')
+model = pickle.load(open('models/model.pkl', 'rb'))
+features = pd.read_csv('features/features.csv')
 
 # Dummy offers (same as training)
 offers = pd.DataFrame({
