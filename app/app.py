@@ -1,120 +1,99 @@
 from flask import Flask, request, jsonify, render_template
-import pandas as pd
 import pickle
+import json
 import os
 from flask_cors import CORS
 
-# -------------------------------
-# INIT APP
-# -------------------------------
 app = Flask(__name__, template_folder='templates')
 CORS(app)
 
-# -------------------------------
-# LOAD MODEL & DATA
-# -------------------------------
-model = pickle.load(open('models/model.pkl', 'rb'))
-model_features = pickle.load(open('models/model_features.pkl', 'rb'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-features = pd.read_csv('features/features.csv')
+# Load lightweight JSON
+with open(os.path.join(BASE_DIR, '../features/features.json')) as f:
+    features = json.load(f)
 
-# -------------------------------
-# OFFERS (same as training)
-# -------------------------------
-offers = pd.DataFrame({
-    'offer_id': [1, 2, 3],
-    'category': ['food', 'shopping', 'travel'],
-    'discount': [10, 20, 15]
-})
+model = None
+model_features = None
 
-# -------------------------------
-# RECOMMEND FUNCTION (ULTRA LIGHT)
-# -------------------------------
+def load_model():
+    global model, model_features
+    if model is None:
+        model = pickle.load(open(os.path.join(BASE_DIR, '../models/model.pkl'), 'rb'))
+        model_features = pickle.load(open(os.path.join(BASE_DIR, '../models/model_features.pkl'), 'rb'))
+
+offers = [
+    {"offer_id": 1, "category": "food", "discount": 10},
+    {"offer_id": 2, "category": "shopping", "discount": 20},
+    {"offer_id": 3, "category": "travel", "discount": 15},
+]
+
 def recommend(user_id):
-    # Get only ONE user
-    user_df = features[features['user_id'] == user_id]
+    load_model()
 
-    if user_df.empty:
+    user_id = str(user_id)
+
+    if user_id not in features:
         return []
 
-    user = user_df.iloc[0].to_dict()
-    rows = []
+    user = features[user_id]
+    results = []
 
-    for _, offer in offers.iterrows():
+    for offer in offers:
         row = {}
 
-        # --- Numeric / base features ---
-        for key in user:
+        # numeric features
+        for key, value in user.items():
             if key not in ['city', 'favorite_category']:
-                row[key] = user[key]
+                row[key] = value
 
-        # --- Encode user categorical features ---
+        # encode user categorical
         for col in model_features:
             if col.startswith('city_'):
                 row[col] = 1 if col == f"city_{user.get('city')}" else 0
             elif col.startswith('favorite_category_'):
                 row[col] = 1 if col == f"favorite_category_{user.get('favorite_category')}" else 0
 
-        # --- Offer features ---
+        # offer features
         row['discount'] = offer['discount']
 
         for cat in ['food', 'shopping', 'travel']:
             row[f'category_{cat}'] = 1 if offer['category'] == cat else 0
 
-        rows.append(row)
+        # align
+        input_row = [row.get(col, 0) for col in model_features]
 
-    data = pd.DataFrame(rows)
+        score = model.predict([input_row])[0]
 
-    # Align with training features
-    for col in model_features:
-        if col not in data.columns:
-            data[col] = 0
-
-    data = data[model_features]
-
-    # Predict
-    scores = model.predict(data)
-
-    # Build response
-    result = []
-    for i, offer in offers.iterrows():
-        result.append({
-            "offer_id": int(offer['offer_id']),
+        results.append({
+            "offer_id": offer['offer_id'],
             "category": offer['category'],
-            "discount": int(offer['discount']),
-            "score": float(scores[i])
+            "discount": offer['discount'],
+            "score": float(score)
         })
 
-    return result
+    return results
 
-# -------------------------------
-# ROUTES
-# -------------------------------
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/recommend', methods=['GET'])
+@app.route('/recommend')
 def get_recommendations():
     try:
         user_id = request.args.get('user_id')
 
         if not user_id:
-            return jsonify({"error": "user_id is required"}), 400
+            return jsonify({"error": "user_id required"}), 400
 
-        user_id = int(user_id)
-
-        results = recommend(user_id)
+        results = recommend(int(user_id))
         return jsonify(results)
 
     except Exception as e:
         import traceback
-        print("FULL ERROR:\n", traceback.format_exc())
+        print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
-# -------------------------------
-# RUN SERVER
-# -------------------------------
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
