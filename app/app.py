@@ -1,23 +1,27 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import pandas as pd
 import pickle
-from flask_cors import CORS
 import os
 
-app = Flask(__name__)
+# -------------------------------
+# INIT APP (ONLY ONCE)
+# -------------------------------
+app = Flask(__name__, template_folder='templates')
 CORS(app)
-# -------------------------------
-# LOAD MODEL & FEATURES
-# -------------------------------
-model = pickle.load(open('models/model.pkl', 'rb'))
-features = pd.read_csv('features/features.csv')
-# Pre-encode user features ONCE (startup time)
-encoded_features = pd.get_dummies(
-    features,
-    columns=['city', 'favorite_category']
-)
 
-# Dummy offers (same as training)
+# -------------------------------
+# LOAD DATA
+# -------------------------------
+# (Model kept but not used in API to avoid timeout)
+model = pickle.load(open('models/model.pkl', 'rb'))
+
+features = pd.read_csv('features/features.csv')
+
+# Reduce memory (IMPORTANT for Render)
+features = features[['user_id', 'avg_spend', 'transaction_count', 'city', 'favorite_category']]
+
+# Dummy offers
 offers = pd.DataFrame({
     'offer_id': [1, 2, 3],
     'category': ['food', 'shopping', 'travel'],
@@ -25,49 +29,48 @@ offers = pd.DataFrame({
 })
 
 # -------------------------------
-# RECOMMENDATION FUNCTION
+# LIGHTWEIGHT RECOMMENDATION ENGINE
 # -------------------------------
 def recommend(user_id):
-    user = encoded_features[encoded_features['user_id'] == user_id]
+    user = features[features['user_id'] == user_id]
 
     if user.empty:
         return []
 
-    user = user.copy()
+    user = user.iloc[0]
 
-    # Cross join
-    user['key'] = 1
-    offers['key'] = 1
-    data = user.merge(offers, on='key').drop('key', axis=1)
+    results = []
 
-    # Encode only offer category (small)
-    data = pd.get_dummies(data, columns=['category'])
+    for _, offer in offers.iterrows():
+        score = 0
 
-    # Align columns
-    model_features = model.feature_name()
+        # Rule-based scoring (FAST)
+        if user['favorite_category'] == offer['category']:
+            score += 5
 
-    for col in model_features:
-        if col not in data.columns:
-            data[col] = 0
+        score += offer['discount'] / 5
+        score += user['avg_spend'] / 500  # simulate ML signal
 
-    data = data[model_features]
+        results.append({
+            "offer_id": int(offer['offer_id']),
+            "category": offer['category'],
+            "discount": int(offer['discount']),
+            "score": float(score)
+        })
 
-    scores = model.predict(data)
-    data['score'] = scores
+    # Sort by score
+    results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    return data[['offer_id', 'discount', 'score']].to_dict(orient='records')
+    return results
 
 
 # -------------------------------
-# API ENDPOINT
+# ROUTES
 # -------------------------------
-from flask import Flask, request, jsonify, render_template
-
-app = Flask(__name__, template_folder='templates')
-
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/recommend', methods=['GET'])
 def get_recommendations():
@@ -83,7 +86,7 @@ def get_recommendations():
         return jsonify(results)
 
     except Exception as e:
-        print("ERROR:", str(e))  # logs in Render
+        print("ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
