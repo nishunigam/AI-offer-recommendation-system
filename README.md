@@ -11,10 +11,10 @@ An end-to-end machine learning system for generating **personalized offer recomm
 ## Demo
 
 ### Home UI
-
+https://github.com/nishunigam/AI-offer-recommendation-system/blob/main/UI_Image.png
 
 ### Recommendations Output
-
+https://github.com/nishunigam/AI-offer-recommendation-system/blob/main/UI_Output.png
 
 ## Project Overview
 
@@ -156,20 +156,20 @@ http://127.0.0.1:5000/recommend?user_id=1
 
 ## Sample Output
 
-```
+```json
 [
-{
-"category": "food",
-"discount": 10,
-"offer_id": 1,
-"score": 4.85
-},
-{
-"category": "shopping",
-"discount": 20,
-"offer_id": 2,
-"score": 3.27
-}
+  {
+    "category": "food",
+    "discount": 10,
+    "offer_id": 1,
+    "score": 4.85
+  },
+  {
+    "category": "shopping",
+    "discount": 20,
+    "offer_id": 2,
+    "score": 3.27
+  }
 ]
 ```
 
