@@ -70,6 +70,14 @@ def recommend(user_id):
 # -------------------------------
 # API ENDPOINT
 # -------------------------------
+from flask import Flask, request, jsonify, render_template
+
+app = Flask(__name__, template_folder='templates')
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 @app.route('/recommend', methods=['GET'])
 def get_recommendations():
     user_id = int(request.args.get('user_id'))
