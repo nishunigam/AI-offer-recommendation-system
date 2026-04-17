@@ -126,29 +126,25 @@ AI-offer-recommendation-system/
 ## How to Run Locally
 
 ### 1. Clone the repo
+```bash
 git clone https://github.com/nishunigam/AI-offer-recommendation-system.git
 cd AI-offer-recommendation-system
-
+```
 
 ### 2. Install dependencies
 pip install -r requirements.txt
 
-
 ### 3. Run preprocessing
 python src/preprocess.py
-
 
 ### 4. Train model
 python src/train.py
 
-
 ### 5. Start Flask server
 python app/app.py
 
-
 ### 6. Open in browser
 http://127.0.0.1:5000/
-
 
 ### Example Request
 http://127.0.0.1:5000/recommend?user_id=1
