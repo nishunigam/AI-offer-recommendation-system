@@ -4,7 +4,9 @@ An end-to-end machine learning system for generating **personalized offer recomm
 
 
 ## Live Demo
+
 [https://ai-offer-recommendation-system.onrender.com](https://ai-offer-recommendation-system.onrender.com/)
+
 
 ## Demo
 
@@ -12,7 +14,7 @@ An end-to-end machine learning system for generating **personalized offer recomm
 
 
 ### Recommendations Output
-UI_Output.png
+
 
 ## Project Overview
 
@@ -28,6 +30,7 @@ The system includes:
 
 ## Architecture
 
+```
 User Data + Transactions
 ↓
 Feature Engineering (Pandas)
@@ -39,6 +42,7 @@ LightGBM Ranking Model
 Flask API (/recommend)
 ↓
 Frontend UI (HTML + Bootstrap)
+```
 
 ## Tech Stack
 
@@ -48,6 +52,7 @@ Frontend UI (HTML + Bootstrap)
 * **Backend:** Flask  
 * **Frontend:** HTML, Bootstrap, JavaScript  
 * **Deployment:** Render  
+
 
 ## Features Implemented
 
@@ -65,12 +70,14 @@ Frontend UI (HTML + Bootstrap)
 * Ranking using LightGBM (`lambdarank` objective)  
 * Lightweight scoring layer for real-time inference  
 
+
 ## Model Details
 
 - Algorithm: LightGBM Ranker (LambdaRank)  
 - Objective: Optimize ranking quality using NDCG  
 - Input: User features + offer features  
 - Output: Relevance score for each user-offer pair
+
 
 ## API
 
@@ -81,6 +88,7 @@ Frontend UI (HTML + Bootstrap)
 Example:
 http://127.0.0.1:5000/recommend?user_id=1
 
+
 ## Frontend UI
 
 * User input for ID  
@@ -89,28 +97,31 @@ http://127.0.0.1:5000/recommend?user_id=1
 * Responsive Bootstrap design  
 * Loading indicator  
 
+
 ## Project Structure
 
+```
 AI-offer-recommendation-system/
 │
 ├── app/
-│ ├── app.py
-│ └── templates/
-│ └── index.html
+│   ├── app.py
+│   └── templates/
+│       └── index.html
 │
 ├── src/
-│ ├── preprocess.py
-│ └── train.py
+│   ├── preprocess.py
+│   └── train.py
 │
 ├── data/
 ├── features/
-│ └── features.csv
+│   └── features.csv
 │
 ├── models/
-│ └── model.pkl
+│   └── model.pkl
 │
 ├── requirements.txt
 ├── Procfile
+```
 
 ## How to Run Locally
 
@@ -118,25 +129,33 @@ AI-offer-recommendation-system/
 git clone https://github.com/nishunigam/AI-offer-recommendation-system.git
 cd AI-offer-recommendation-system
 
+
 ### 2. Install dependencies
 pip install -r requirements.txt
+
 
 ### 3. Run preprocessing
 python src/preprocess.py
 
+
 ### 4. Train model
 python src/train.py
+
 
 ### 5. Start Flask server
 python app/app.py
 
+
 ### 6. Open in browser
 http://127.0.0.1:5000/
+
 
 ### Example Request
 http://127.0.0.1:5000/recommend?user_id=1
 
+
 ## Sample Output
+
 [
 {
 "category": "food",
@@ -157,9 +176,11 @@ http://127.0.0.1:5000/recommend?user_id=1
 
 The application is deployed on a cloud platform and supports **real-time inference via REST API**.
 
+
 ## Production Insight
 
 To ensure **low-latency performance in a resource-constrained environment**, a lightweight scoring layer is used during inference while the ML model is trained offline.
+
 
 ## Key Learning Outcomes
 
@@ -169,6 +190,7 @@ To ensure **low-latency performance in a resource-constrained environment**, a l
 * Integrated ML model into a production-like API  
 * Connected backend with a dynamic frontend UI  
 
+
 ## Future Improvements (Phase 2)
 
 * Use real-world dataset (Kaggle)  
@@ -176,10 +198,12 @@ To ensure **low-latency performance in a resource-constrained environment**, a l
 * Add user authentication  
 * Implement model retraining pipeline  
 * Add logging & monitoring
+
   
 ## Resume Highlight
 
 Built and deployed an end-to-end ML-based recommendation system using LightGBM ranking, serving real-time personalized offers via a Flask API with an interactive frontend UI, optimized for low-latency cloud deployment.
+
 
 ## 👤 Author
 
