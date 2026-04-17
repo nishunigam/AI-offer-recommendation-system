@@ -1,27 +1,40 @@
 from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
 import pandas as pd
 import pickle
 import os
+from flask_cors import CORS
 
 # -------------------------------
-# INIT APP (ONLY ONCE)
+# INIT APP
 # -------------------------------
 app = Flask(__name__, template_folder='templates')
 CORS(app)
 
 # -------------------------------
-# LOAD DATA
+# LOAD MODEL & DATA
 # -------------------------------
-# (Model kept but not used in API to avoid timeout)
 model = pickle.load(open('models/model.pkl', 'rb'))
+model_features = pickle.load(open('models/model_features.pkl', 'rb'))
 
 features = pd.read_csv('features/features.csv')
 
-# Reduce memory (IMPORTANT for Render)
-features = features[['user_id', 'avg_spend', 'transaction_count', 'city', 'favorite_category']]
+# Encode ONCE (startup)
+encoded_features = pd.get_dummies(
+    features,
+    columns=['city', 'favorite_category']
+)
 
-# Dummy offers
+# -------------------------------
+# PRECOMPUTE USER FEATURE MAP
+# -------------------------------
+user_features_map = {}
+
+for _, row in encoded_features.iterrows():
+    user_features_map[row['user_id']] = row.to_dict()
+
+# -------------------------------
+# OFFERS (same as training)
+# -------------------------------
 offers = pd.DataFrame({
     'offer_id': [1, 2, 3],
     'category': ['food', 'shopping', 'travel'],
@@ -29,24 +42,14 @@ offers = pd.DataFrame({
 })
 
 # -------------------------------
-# LIGHTWEIGHT RECOMMENDATION ENGINE
+# RECOMMEND FUNCTION (FAST)
 # -------------------------------
-# Load feature columns
-model_features = pickle.load(open('models/model_features.pkl', 'rb'))
-
-# Precompute user features (ONE ROW PER USER)
-user_features_map = {}
-
-for _, row in encoded_features.iterrows():
-    user_features_map[row['user_id']] = row.to_dict()
-
 def recommend(user_id):
     if user_id not in user_features_map:
         return []
 
     user = user_features_map[user_id]
-
-    results = []
+    rows = []
 
     for _, offer in offers.iterrows():
         row = user.copy()
@@ -58,32 +61,37 @@ def recommend(user_id):
         for cat in ['food', 'shopping', 'travel']:
             row[f'category_{cat}'] = 1 if offer['category'] == cat else 0
 
-        results.append(row)
+        rows.append(row)
 
-    data = pd.DataFrame(results)
+    data = pd.DataFrame(rows)
 
-    # Align columns
+    # Align with model features
     for col in model_features:
         if col not in data.columns:
             data[col] = 0
 
     data = data[model_features]
 
+    # Predict
     scores = model.predict(data)
 
-    data['score'] = scores
-    data['offer_id'] = offers['offer_id']
-    data['category'] = offers['category']
-    data['discount'] = offers['discount']
+    result = []
+    for i, offer in offers.iterrows():
+        result.append({
+            "offer_id": int(offer['offer_id']),
+            "category": offer['category'],
+            "discount": int(offer['discount']),
+            "score": float(scores[i])
+        })
 
-    return data[['offer_id', 'category', 'discount', 'score']].to_dict(orient='records')
+    return result
+
 # -------------------------------
 # ROUTES
 # -------------------------------
 @app.route('/')
 def home():
     return render_template('index.html')
-
 
 @app.route('/recommend', methods=['GET'])
 def get_recommendations():
@@ -100,7 +108,7 @@ def get_recommendations():
 
     except Exception as e:
         import traceback
-        print("FULL ERROR:\n", traceback.format_exc())  # 🔥 IMPORTANT
+        print("FULL ERROR:\n", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 # -------------------------------
