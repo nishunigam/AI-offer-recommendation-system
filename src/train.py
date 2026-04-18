@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import pickle
+import os
 
 # Try importing LightGBM
 try:
@@ -84,10 +85,12 @@ model = lgb.train(params, train_data, num_boost_round=300)
 # -------------------------------
 # SAVE MODEL
 # -------------------------------
-import os
 os.makedirs('../models', exist_ok=True)
 
 with open('../models/model.pkl', 'wb') as f:
     pickle.dump(model, f)
+
+with open('../models/model_features.pkl', 'wb') as f:
+    pickle.dump(X.columns.tolist(), f)
 
 print("Model trained and saved to models/model.pkl")

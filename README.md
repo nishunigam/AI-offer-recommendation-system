@@ -1,11 +1,11 @@
-# AI Offer Recommendation System (Phase 1)
+# AI Offer Recommendation System
+> Phase 1 Complete — Production-ready ML system deployed
 
 An end-to-end machine learning system for generating **personalized offer recommendations** using user behavior and transactional data.
 
 
 ## Live Demo
-
-[https://ai-offer-recommendation-system.onrender.com](https://ai-offer-recommendation-system.onrender.com/)
+https://ai-offer-recommendation-system-7ju8.onrender.com/
 
 
 ## Demo
@@ -15,6 +15,7 @@ An end-to-end machine learning system for generating **personalized offer recomm
 
 ### Recommendations Output
 ![Results](https://raw.githubusercontent.com/nishunigam/AI-offer-recommendation-system/main/UI_Output.png)
+
 
 ## Project Overview
 
@@ -70,6 +71,13 @@ Frontend UI (HTML + Bootstrap)
 * Ranking using LightGBM (`lambdarank` objective)  
 * Lightweight scoring layer for real-time inference  
 
+### Production Optimization
+
+- Optimized inference to avoid memory issues in cloud deployment
+- Reduced heavy pandas operations during runtime
+- Implemented lightweight feature handling for fast API response
+- Fixed worker timeout issues in deployment
+  
 
 ## Model Details
 
@@ -180,7 +188,14 @@ http://127.0.0.1:5000/recommend?user_id=1
 
 ## Deployment
 
-The application is deployed on a cloud platform and supports **real-time inference via REST API**.
+The application is deployed on a cloud platform and supports real-time inference.
+
+### Deployment Highlights
+
+- Deployed using Flask + Gunicorn
+- Handles real-time API requests
+- Optimized to prevent memory overflow and worker timeouts
+- End-to-end integration of ML model with frontend UI
 
 
 ## Production Insight
@@ -197,21 +212,12 @@ To ensure **low-latency performance in a resource-constrained environment**, a l
 * Connected backend with a dynamic frontend UI  
 
 
-## Future Improvements (Phase 2)
-
-* Use real-world dataset (Kaggle)  
-* Improve ranking features (RFM, time decay)  
-* Add user authentication  
-* Implement model retraining pipeline  
-* Add logging & monitoring
-
-  
 ## Resume Highlight
 
-Built and deployed an end-to-end ML-based recommendation system using LightGBM ranking, serving real-time personalized offers via a Flask API with an interactive frontend UI, optimized for low-latency cloud deployment.
+Built and deployed a production-ready personalized recommendation system using LightGBM ranking, serving real-time predictions via a Flask API, with optimized inference to handle cloud deployment constraints.
 
 
-## 👤 Author
+## Author
 
 **Nishchala Nigam**  
 https://github.com/nishunigam
